@@ -1,0 +1,160 @@
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+fn main(){
+    let f = File::open("input.txt").unwrap();
+    let f = BufReader::new(f);
+
+    let mut wire1: Vec<String> = Vec::new();
+    let mut wire2: Vec<String> = Vec::new();
+    let mut wire_num: i8 = 0;
+
+    let mut grid = vec![vec![0i8; 100000]; 100000];
+    let mut direction : char;
+    let mut magnitude : i32;
+    let mut x_position = 50000;    
+    let mut y_position = 50000;    
+
+    let mut x_max = 0;
+    let mut y_max = 0;
+    let mut x_min = 0;
+    let mut y_min = 0;
+
+    let mut shortest_manhattan_distance = 100000;
+
+    grid[x_position][y_position] = 3;
+
+    for line in f.lines(){
+        for value in line.unwrap().split(","){
+            if wire_num == 0{
+                wire1.push(value.to_string());
+            }
+            if wire_num == 1{
+                wire2.push(value.to_string());
+            }
+        }
+        wire_num += 1;
+    }
+
+    //record path of first wire
+    for instruction in wire1{
+        direction = instruction.chars().nth(0).unwrap();
+        magnitude = instruction[1..].to_string().parse::<i32>().unwrap();
+        
+        if direction == 'U' {
+            while magnitude > 0{
+                y_position += 1;
+                grid[x_position][y_position] += 1;
+                magnitude -= 1;
+                if y_position > y_max {
+                    y_max = y_position;
+                }
+            }
+        }
+        else if direction == 'D' {
+            while magnitude > 0{
+                y_position -= 1;
+                grid[x_position][y_position] += 1;
+                magnitude -= 1;
+                if y_position < y_min {
+                    y_min = y_position;
+                }
+            }
+        }
+        else if direction == 'L' {
+            while magnitude > 0{
+                x_position -= 1;
+                grid[x_position][y_position] += 1;
+                magnitude -= 1;
+                if x_position < x_min {
+                    x_min = x_position;
+                }
+            }
+        }
+        else if direction == 'R' {
+            while magnitude > 0{
+                x_position += 1;
+                grid[x_position][y_position] += 1;
+                magnitude -= 1;
+                if x_position > x_max {
+                    x_max = x_position;
+                }
+            }
+        }        
+    }
+
+    //reset current position to center for second wire
+    x_position = 50000;    
+    y_position = 50000; 
+
+    //record path of second wire
+    for instruction in wire2{
+        direction = instruction.chars().nth(0).unwrap();
+        magnitude = instruction[1..].to_string().parse::<i32>().unwrap();
+        
+        if direction == 'U' {
+            while magnitude > 0{
+                y_position += 1;
+                grid[x_position][y_position] += 2;
+                magnitude -= 1;
+                if y_position > y_max {
+                    y_max = y_position;
+                }
+            }
+        }
+        else if direction == 'D' {
+            while magnitude > 0{
+                y_position -= 1;
+                grid[x_position][y_position] += 2;
+                magnitude -= 1;
+                if y_position < y_min {
+                    y_min = y_position;
+                }
+            }
+        }
+        else if direction == 'L' {
+            while magnitude > 0{
+                x_position -= 1;
+                grid[x_position][y_position] += 2;
+                magnitude -= 1;
+                if x_position < x_min {
+                    x_min = x_position;
+                }
+            }
+        }
+        else if direction == 'R' {
+            while magnitude > 0{
+                x_position += 1;
+                grid[x_position][y_position] += 2;
+                magnitude -= 1;
+                if x_position > x_max {
+                    x_max = x_position;
+                }
+            }
+        }        
+    }
+
+    //output a cross of the wires
+    x_position = x_min;
+
+    while x_position < x_max {
+        y_position = y_min;
+        while y_position < y_max {
+            if grid[x_position][y_position] == 3 {
+                //println!("Cross detected at x_position: {}, y_position: {}",x_position,y_position);
+                //println!("Manhattan distance to center is : {}",(50000-x_position as i32).abs() + (50000-y_position as i32).abs());
+                if (50000-x_position as i32).abs() + (50000-y_position as i32).abs() < shortest_manhattan_distance{
+                    if (50000-x_position as i32).abs() + (50000-y_position as i32).abs() != 0 {
+                        shortest_manhattan_distance = (50000-x_position as i32).abs() + (50000-y_position as i32).abs();
+                    }
+                }
+            }
+            y_position += 1;
+        }
+        x_position += 1;
+    }
+
+    println!("Part 1: {}", shortest_manhattan_distance);
+
+    
+}
